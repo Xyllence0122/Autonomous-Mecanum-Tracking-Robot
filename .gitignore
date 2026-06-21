@@ -1,1 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.DS_Store
+*.log
+*.mp4
+*.avi
+*.jpg
+*.png
+!docs/*.png
 
