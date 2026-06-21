@@ -72,3 +72,25 @@ Camera
 ## 🔁 Communication
 
 Format:
+LF,RF,LR,RR
+
+Sent from Raspberry Pi → Arduino Mega via USB Serial
+
+Range: -255 ~ 255
+
+---
+
+## 📦 Dependencies
+- opencv-python
+- numpy
+- pyserial
+- pygame
+  
+---
+
+## 🚀 Future Work
+
+- PID control tuning
+- ArUco marker support
+- SLAM mapping
+- Obstacle avoidance
