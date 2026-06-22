@@ -8,88 +8,67 @@ The system detects and tracks a red target using OpenCV image processing techniq
 
 The project demonstrates the integration of:
 
-- Computer Vision
-- Mobile Robotics
-- Mecanum Wheel Kinematics
-- Embedded Systems
-- Human Teleoperation
-- Autonomous Target Tracking
-
----
-
-## System Architecture
-
-USB Camera
-     │
-     ▼
-Raspberry Pi 5
-(Ubuntu 24.04)
-     │
-     │ OpenCV
-     ▼
-Target Detection
-     │
-     ▼
-Tracking Controller
-     │
-     ▼
-Mecanum Kinematics
-     │
-     ▼
-USB Serial
-     │
-     ▼
-Arduino Mega 2560
-     │
-     ▼
-Motor Drivers
-     │
-     ▼
-4 Mecanum Wheels
+* Computer Vision
+* Mobile Robotics
+* Mecanum Wheel Kinematics
+* Embedded Systems
+* Human Teleoperation
+* Autonomous Target Tracking
 
 ---
 
 ## Hardware Components
 
-| Component | Model |
-|------------|---------|
-| SBC | Raspberry Pi 5 |
-| Operating System | Ubuntu 24.04 LTS |
-| Microcontroller | Arduino Mega 2560 |
-| Camera | USB Camera |
-| Drive System | 4-Wheel Mecanum Platform |
-| Communication | USB Serial (115200 baud) |
+| Component        | Model                    |
+| ---------------- | ------------------------ |
+| SBC              | Raspberry Pi 5           |
+| Operating System | Ubuntu 24.04 LTS         |
+| Microcontroller  | Arduino Mega 2560        |
+| Camera           | USB Camera               |
+| Drive System     | 4-Wheel Mecanum Platform |
+| Communication    | USB Serial (115200 baud) |
 
 ---
 
-## Features
+## System Architecture
 
-### Manual Teleoperation
-
-- USB Game Controller Support
-- Omnidirectional Mecanum Movement
-- Real-Time Wheel Velocity Control
-
-### Autonomous Tracking
-
-- HSV Color Segmentation
-- Red Object Detection
-- Contour Filtering
-- Target Locking Mechanism
-- Distance-Based Motion Control
-- Automatic Center Alignment
-
-### Safety Functions
-
-- Target Lost Detection
-- Automatic Stop
-- Wheel Speed Limiting
-- Communication Timeout Protection
+```text
+USB Camera
+    │
+    ▼
+Raspberry Pi 5
+(Ubuntu 24.04)
+    │
+    ▼
+OpenCV Vision Processing
+    │
+    ▼
+Target Detection
+    │
+    ▼
+Tracking Controller
+    │
+    ▼
+Mecanum Kinematics
+    │
+    ▼
+USB Serial Communication
+    │
+    ▼
+Arduino Mega 2560
+    │
+    ▼
+Motor Drivers
+    │
+    ▼
+4-Wheel Mecanum Robot
+```
 
 ---
 
 ## Repository Structure
 
+```text
 Autonomous-Mecanum-Tracking-Robot
 │
 ├── README.md
@@ -99,18 +78,16 @@ Autonomous-Mecanum-Tracking-Robot
 ├── docs
 │   ├── system_architecture.png
 │   ├── wiring_diagram.png
-│   └── demo_video.gif
+│   └── demo_video_link.txt
 │
 ├── arduino
 │   └── mecanum_controller.ino
 │
 ├── raspberry_pi
-│   ├── main_tracking.py
-│   ├── teleop_controller.py
-│   ├── vision.py
-│   ├── tracker.py
-│   ├── controller.py
-│   └── serial_comm.py
+│   ├── main_teleop.py
+│   ├── red_tracking.py
+│   ├── serial_comm.py
+│   └── vision_control.py
 │
 ├── calibration
 │   ├── hsv_tuner.py
@@ -120,69 +97,86 @@ Autonomous-Mecanum-Tracking-Robot
     ├── motor_test.py
     ├── serial_test.py
     └── camera_test.py
+```
 
 ---
 
-## Software Environment
+## Features
 
-Operating System
+### Manual Teleoperation
 
-Ubuntu 24.04 LTS
+* USB Game Controller Support
+* Omnidirectional Mecanum Movement
+* Real-Time Wheel Velocity Control
 
-Python Version
+### Autonomous Tracking
 
-Python 3.12+
+* HSV Color Segmentation
+* Red Target Detection
+* Contour Filtering
+* Target Locking Mechanism
+* Distance-Based Motion Control
+* Automatic Center Alignment
 
-Dependencies
+### Safety Features
 
+* Automatic Stop When Target Is Lost
+* Wheel Speed Limiting
+* Communication Failure Protection
+
+---
+
+## Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/Xyllence0122/Autonomous-Mecanum-Tracking-Robot.git
+cd Autonomous-Mecanum-Tracking-Robot
+```
+
+Create a Python virtual environment:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
 pip install -r requirements.txt
-
-requirements.txt
-
-opencv-python
-numpy
-pyserial
-pygame
-
----
-
-## Arduino Setup
-
-Upload:
-
-arduino/mecanum_controller.ino
-
-to:
-
-Arduino Mega 2560
-
-Baudrate:
-
-Serial.begin(115200);
+```
 
 ---
 
 ## Running the System
 
-Activate Python Environment
+Activate the virtual environment:
 
-cd ~/Robot
+```bash
 source venv/bin/activate
+```
 
-Manual Driving Mode
+Manual driving mode:
 
-python raspberry_pi/teleop_controller.py
+```bash
+python raspberry_pi/main_teleop.py
+```
 
-Autonomous Tracking Mode
+Autonomous tracking mode:
 
-python raspberry_pi/main_tracking.py
+```bash
+python raspberry_pi/vision_control.py
+```
 
 ---
 
 ## Mecanum Wheel Mixing
 
-Wheel velocities are generated using standard mecanum inverse kinematics:
+The robot uses standard mecanum inverse kinematics:
 
+```text
 LF = Vy + Vx + Wz
 
 RF = Vy - Vx - Wz
@@ -190,55 +184,76 @@ RF = Vy - Vx - Wz
 LR = Vy - Vx + Wz
 
 RR = Vy + Vx - Wz
+```
 
 Where:
 
-Vx = Lateral Velocity
-
-Vy = Forward Velocity
-
-Wz = Rotational Velocity
+* Vx = Lateral Velocity
+* Vy = Forward Velocity
+* Wz = Rotational Velocity
 
 ---
 
 ## Computer Vision Pipeline
 
 1. Capture image from USB Camera
-
-2. Convert BGR to HSV
-
+2. Convert BGR image to HSV
 3. Apply red color threshold
+4. Perform morphological filtering
+5. Extract contours
+6. Score candidate targets
+7. Lock onto the best target
+8. Estimate target position
+9. Generate wheel velocity commands
 
-4. Morphological filtering
+---
 
-5. Contour extraction
+## Current Project Status
 
-6. Candidate scoring
+### Completed
 
-7. Target locking
+* Raspberry Pi 5 ↔ Arduino Mega Serial Communication
+* USB Game Controller Teleoperation
+* Four-Wheel Mecanum Drive Control
+* OpenCV Red Target Detection
+* HSV-Based Color Segmentation
+* Autonomous Target Tracking
+* Target Locking and Filtering
+* Real-Time Wheel Velocity Control
 
-8. Position estimation
+### In Progress
 
-9. Motion command generation
+* Software Modularization
+* Manual / Autonomous Mode Switching
+* Logging and Diagnostics System
+
+### Planned
+
+* YOLO Object Detection
+* ROS 2 Integration
+* Multi-Target Tracking
+* Autonomous Navigation
+* Web Monitoring Dashboard
 
 ---
 
 ## Future Improvements
 
-- YOLO Object Detection
-- Multi-Target Tracking
-- ROS 2 Integration
-- SLAM Navigation
-- Web-Based Monitoring Dashboard
-- PID Auto-Tuning
+* YOLO-Based Object Detection
+* ROS 2 Migration
+* SLAM Navigation
+* Web Dashboard
+* PID Auto-Tuning
 
 ---
 
 ## Demonstration
 
-Add demonstration images or videos here.
+Add project videos, GIFs, or images here.
 
-docs/demo_video.gif
+```text
+docs/demo_video_link.txt
+```
 
 ---
 
@@ -246,11 +261,7 @@ docs/demo_video.gif
 
 This project is licensed under the GNU General Public License v3.0 (GPL-3.0).
 
-You are free to use, modify, and distribute this software under the terms of the GPL-3.0 license.
-
-Any derivative work based on this project must also be released under the GPL-3.0 license and provide access to the corresponding source code.
-
-For more details, see the LICENSE file included in this repository.
+See the LICENSE file for details.
 
 ---
 
@@ -258,45 +269,16 @@ For more details, see the LICENSE file included in this repository.
 
 Chao-Lin Chen
 
-Department of Intelligent Automation of Engineering
+Department of Intelligent Automation Engineering
 
 National Taipei University of Technology
 
-Taiwan
+Taipei, Taiwan
 
 ---
 
 ## Project Goal
 
-The primary objective of this project is to develop an autonomous vision-guided mecanum robot capable of detecting, tracking, and approaching a target object in real time.
+The goal of this project is to develop an autonomous vision-guided mecanum robot capable of detecting, tracking, and approaching a target object in real time.
 
-The system combines computer vision, embedded control, and omnidirectional mobile robotics into a lightweight and low-cost platform suitable for educational, research, and robotics competition applications.
-
----
-
-## Current Project Status
-
-Completed:
-
-- Raspberry Pi 5 and Arduino Mega serial communication
-- USB game controller teleoperation
-- Four-wheel mecanum drive control
-- OpenCV red target detection
-- HSV-based color segmentation
-- Autonomous target tracking
-- Target locking and filtering
-- Real-time wheel velocity control
-
-In Progress:
-
-- Software modularization
-- Automatic/manual mode switching
-- System logging and diagnostics
-
-Planned:
-
-- YOLO-based object detection
-- ROS 2 migration
-- Multi-object tracking
-- Autonomous navigation
-- Web monitoring interface
+The system combines computer vision, embedded control, and omnidirectional mobile robotics into a lightweight and low-cost platform suitable for education, research, and robotics competitions.
