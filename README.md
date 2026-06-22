@@ -1,139 +1,302 @@
-# Raspberry Pi 5 Red Target Tracking Mecanum Robot
+# Autonomous Mecanum Tracking Robot
 
-This project uses OpenCV HSV color segmentation and contour detection to track a red corrugated board. Wheel speed commands are transmitted to an Arduino Mega through USB Serial communication for controlling a four-wheel mecanum robot.
+## Overview
 
----
+Autonomous Mecanum Tracking Robot is a computer vision-based mobile robot developed using a Raspberry Pi 5 and Arduino Mega 2560.
 
-## Installation
+The system detects and tracks a red target using OpenCV image processing techniques and autonomously drives a four-wheel mecanum platform through real-time visual feedback.
 
-Install the required Python packages:
+The project demonstrates the integration of:
 
-```bash
-python3 -m pip install -r requirements.txt
-```
-
-If you are using Raspberry Pi OS and prefer system-managed packages, you can install the dependencies with:
-
-```bash
-sudo apt update
-sudo apt install -y python3-opencv python3-serial python3-numpy
-```
+- Computer Vision
+- Mobile Robotics
+- Mecanum Wheel Kinematics
+- Embedded Systems
+- Human Teleoperation
+- Autonomous Target Tracking
 
 ---
 
-## Running the Program
+## System Architecture
 
-First, identify the serial port connected to the Arduino Mega:
-
-```bash
-ls /dev/ttyACM* /dev/ttyUSB*
-```
-
-### Standard Execution
-
-```bash
-python3 red_mecanum_tracker.py --serial-port /dev/ttyACM0
-```
-
-### Camera and Detection Test Only (No Arduino Output)
-
-```bash
-python3 red_mecanum_tracker.py --dry-run
-```
-
-### Headless Mode (Without GUI Display)
-
-```bash
-python3 red_mecanum_tracker.py --serial-port /dev/ttyACM0 --no-display
-```
-
----
-
-## Common Parameter Adjustments
-
-```bash
-python3 red_mecanum_tracker.py \
-  --serial-port /dev/ttyACM0 \
-  --kp 0.003 \
-  --target-area 18000 \
-  --min-area 1000 \
-  --forward-speed 0.35 \
-  --max-wz 0.65 \
-  --center-deadband-px 25
-```
-
-### Parameter Description
-
-| Parameter              | Description                                                                                                                                                         |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--kp`                 | Proportional gain for converting horizontal tracking error into rotational velocity. If too large, the robot may oscillate; if too small, turning will be sluggish. |
-| `--target-area`        | Target contour area used to determine when the robot should stop approaching the object. Larger values cause the robot to stop earlier.                             |
-| `--min-area`           | Minimum contour area threshold used to filter out noise and small objects.                                                                                          |
-| `--forward-speed`      | Forward velocity while approaching the target. A recommended starting range is 0.20–0.35.                                                                           |
-| `--max-wz`             | Maximum rotational control output used to limit turning speed.                                                                                                      |
-| `--center-deadband-px` | Deadband around the image center to reduce oscillation when the target is nearly centered.                                                                          |
+USB Camera
+     │
+     ▼
+Raspberry Pi 5
+(Ubuntu 24.04)
+     │
+     │ OpenCV
+     ▼
+Target Detection
+     │
+     ▼
+Tracking Controller
+     │
+     ▼
+Mecanum Kinematics
+     │
+     ▼
+USB Serial
+     │
+     ▼
+Arduino Mega 2560
+     │
+     ▼
+Motor Drivers
+     │
+     ▼
+4 Mecanum Wheels
 
 ---
 
-## Direction Control
+## Hardware Components
 
-The tracking controller uses the following control equation:
-
-```python
-error_x = cx - target_x
-wz = -error_x * Kp
-```
-
-If the robot rotates in the opposite direction from what is expected, try using a negative proportional gain:
-
-```bash
-python3 red_mecanum_tracker.py --serial-port /dev/ttyACM0 --kp -0.003
-```
+| Component | Model |
+|------------|---------|
+| SBC | Raspberry Pi 5 |
+| Operating System | Ubuntu 24.04 LTS |
+| Microcontroller | Arduino Mega 2560 |
+| Camera | USB Camera |
+| Drive System | 4-Wheel Mecanum Platform |
+| Communication | USB Serial (115200 baud) |
 
 ---
 
-## Serial Communication Format
+## Features
 
-The Arduino Mega receives wheel commands in the following format:
+### Manual Teleoperation
 
-```text
-LF,RF,LR,RR\n
-```
+- USB Game Controller Support
+- Omnidirectional Mecanum Movement
+- Real-Time Wheel Velocity Control
 
-Example:
+### Autonomous Tracking
 
-```text
-120,-80,120,-80
-```
+- HSV Color Segmentation
+- Red Object Detection
+- Contour Filtering
+- Target Locking Mechanism
+- Distance-Based Motion Control
+- Automatic Center Alignment
 
-Wheel speed values are constrained to the range:
+### Safety Functions
 
-```text
--255 ~ 255
-```
-
-where:
-
-* **LF** = Left Front Wheel
-* **RF** = Right Front Wheel
-* **LR** = Left Rear Wheel
-* **RR** = Right Rear Wheel
+- Target Lost Detection
+- Automatic Stop
+- Wheel Speed Limiting
+- Communication Timeout Protection
 
 ---
 
-## System Overview
+## Repository Structure
 
-**Raspberry Pi 5**
+Autonomous-Mecanum-Tracking-Robot
+│
+├── README.md
+├── requirements.txt
+├── LICENSE
+│
+├── docs
+│   ├── system_architecture.png
+│   ├── wiring_diagram.png
+│   └── demo_video.gif
+│
+├── arduino
+│   └── mecanum_controller.ino
+│
+├── raspberry_pi
+│   ├── main_tracking.py
+│   ├── teleop_controller.py
+│   ├── vision.py
+│   ├── tracker.py
+│   ├── controller.py
+│   └── serial_comm.py
+│
+├── calibration
+│   ├── hsv_tuner.py
+│   └── joystick_mapper.py
+│
+└── tests
+    ├── motor_test.py
+    ├── serial_test.py
+    └── camera_test.py
 
-* Captures images from a USB camera
-* Detects and tracks a red target using OpenCV
-* Computes mecanum wheel velocity commands
-* Sends wheel speeds to Arduino Mega via USB Serial
+---
 
-**Arduino Mega**
+## Software Environment
 
-* Receives wheel commands
-* Controls the motor drivers
-* Drives the four mecanum wheels
+Operating System
 
-This architecture enables autonomous visual target tracking while maintaining a lightweight and modular hardware design.
+Ubuntu 24.04 LTS
+
+Python Version
+
+Python 3.12+
+
+Dependencies
+
+pip install -r requirements.txt
+
+requirements.txt
+
+opencv-python
+numpy
+pyserial
+pygame
+
+---
+
+## Arduino Setup
+
+Upload:
+
+arduino/mecanum_controller.ino
+
+to:
+
+Arduino Mega 2560
+
+Baudrate:
+
+Serial.begin(115200);
+
+---
+
+## Running the System
+
+Activate Python Environment
+
+cd ~/Robot
+source venv/bin/activate
+
+Manual Driving Mode
+
+python raspberry_pi/teleop_controller.py
+
+Autonomous Tracking Mode
+
+python raspberry_pi/main_tracking.py
+
+---
+
+## Mecanum Wheel Mixing
+
+Wheel velocities are generated using standard mecanum inverse kinematics:
+
+LF = Vy + Vx + Wz
+
+RF = Vy - Vx - Wz
+
+LR = Vy - Vx + Wz
+
+RR = Vy + Vx - Wz
+
+Where:
+
+Vx = Lateral Velocity
+
+Vy = Forward Velocity
+
+Wz = Rotational Velocity
+
+---
+
+## Computer Vision Pipeline
+
+1. Capture image from USB Camera
+
+2. Convert BGR to HSV
+
+3. Apply red color threshold
+
+4. Morphological filtering
+
+5. Contour extraction
+
+6. Candidate scoring
+
+7. Target locking
+
+8. Position estimation
+
+9. Motion command generation
+
+---
+
+## Future Improvements
+
+- YOLO Object Detection
+- Multi-Target Tracking
+- ROS 2 Integration
+- SLAM Navigation
+- Web-Based Monitoring Dashboard
+- PID Auto-Tuning
+
+---
+
+## Demonstration
+
+Add demonstration images or videos here.
+
+docs/demo_video.gif
+
+---
+
+## License
+
+This project is licensed under the GNU General Public License v3.0 (GPL-3.0).
+
+You are free to use, modify, and distribute this software under the terms of the GPL-3.0 license.
+
+Any derivative work based on this project must also be released under the GPL-3.0 license and provide access to the corresponding source code.
+
+For more details, see the LICENSE file included in this repository.
+
+---
+
+## Author
+
+Chao-Lin Chen
+
+Department of Intelligent Automation of Engineering
+
+National Taipei University of Technology
+
+Taiwan
+
+---
+
+## Project Goal
+
+The primary objective of this project is to develop an autonomous vision-guided mecanum robot capable of detecting, tracking, and approaching a target object in real time.
+
+The system combines computer vision, embedded control, and omnidirectional mobile robotics into a lightweight and low-cost platform suitable for educational, research, and robotics competition applications.
+
+---
+
+## Current Project Status
+
+Completed:
+
+- Raspberry Pi 5 and Arduino Mega serial communication
+- USB game controller teleoperation
+- Four-wheel mecanum drive control
+- OpenCV red target detection
+- HSV-based color segmentation
+- Autonomous target tracking
+- Target locking and filtering
+- Real-time wheel velocity control
+
+In Progress:
+
+- Software modularization
+- Automatic/manual mode switching
+- System logging and diagnostics
+
+Planned:
+
+- YOLO-based object detection
+- ROS 2 migration
+- Multi-object tracking
+- Autonomous navigation
+- Web monitoring interface
