@@ -1,1 +1,6 @@
+demo video link: 
 
+1. vision_control: https://youtu.be/25zYJBnuKW8
+2. vision_control_pi: https://youtu.be/H0_4FjMv0fY
+3. main_teleop: https://youtu.be/z1bbRRKpz0U
+4. main_teleop_pi: https://youtu.be/rc5gcBVVs1s
