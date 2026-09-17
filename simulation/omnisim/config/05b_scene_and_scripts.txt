@@ -1,0 +1,155 @@
+(reproducibility configuration, part 2: board, distractors, export
+configuration, the scripts, the re-run recipe)
+
+OmniSim synthetic-data export - reproducibility configuration, part 2 of 2
+for
+https://github.com/Xyllence0122/Autonomous-Mecanum-Tracking-Robot
+Same export as part 1: wgpu-native renderer, AgX tonemap, no physics, seed
+21.
+Licence: Apache License 2.0. Redistribution permitted with attribution.
+
+6. TARGET-BOARD GEOMETRY AND MATERIALS
+------------------------------------------------------------------------
+DEF RED_TARGET, instance id 3, name "red_target"
+geometry Box 0.70 (w) x 0.06 (thick) x 0.40 (tall) m
+translation 0.35 0 0.55
+0.35 m OFF the camera orbit centre, on purpose: the exporter
+always aims at the orbit centre, so an on-centre target would
+give a horizontal image error of about 0 in every frame and
+would exercise nothing in a turn controller.
+appearance PBRAppearance baseColor 0.85 0.04 0.04, roughness 0.65,
+metalness 0
+DEF TARGET_POST, id 4, Box 0.06 x 0.06 x 0.35 m at (0.35, 0, 0.175),
+baseColor 0.18 0.18 0.19, roughness 0.8, metalness 0.1
+It is a real BOARD, not a cube, so at grazing azimuth it foreshortens to a
+sliver. That is a genuine property of the target, and it is what six of the
+eight rejections are about.
+
+7. DISTRACTOR DEFINITIONS AND PLACEMENTS
+------------------------------------------------------------------------
+DEF id geometry translation (m)
+DISTRACTOR_BLUE_CRATE 5 Box 0.44 0.44 0.44 -1.35 0.85 0.22
+DISTRACTOR_GREY_DRUM 6 Cylinder r 0.26 h 0.60 -1.10 -1.30 0.30
+DISTRACTOR_GREEN_PANEL 7 Box 0.50 0.05 0.70 1.50 -1.10 0.35
+DISTRACTOR_ORANGE_CONE 8 Box 0.26 0.26 0.36 1.25 1.35 0.18
+materials, all PBRAppearance, metalness 0 unless stated:
+blue crate baseColor 0.10 0.22 0.62 roughness 0.70
+grey drum baseColor 0.55 0.55 0.53 roughness 0.55 metalness 0.25
+green panel baseColor 0.12 0.45 0.16 roughness 0.70
+orange block baseColor 0.85 0.36 0.06 roughness 0.75
+The scene also holds DEF GROUND (id 1, Box 40 x 40 x 0.10 at z -0.05, Grass=
+,
+texture scale 12 x 12) and DEF PAD (id 2, Box 6 x 6 x 0.01 at z 0.002,
+Pavement, scale 4 x 4).
+The orange block is the hard one, and your HSV gate rejected it in all 16
+frames: the candidate count never exceeded 1, so zero false positives.
+
+8. RGB / DEPTH / SEGMENTATION EXPORT CONFIGURATION
+------------------------------------------------------------------------
+The exporter dumps the renderer's MAIN VIEW, configured through environment
+variables set on each per-sample engine process:
+OMNISIM_WGPU_SYNTH_DUMP =3D that sample's output directory
+OMNISIM_WGPU_MAINVIEW_DUMP_FRAME =3D 60
+OMNISIM_WGPU_CLOUD_COVER =3D the sampled cover, 3 decimal places
+OMNISIM_LOG_PATH =3D that sample's engine log path
+OMNISIM_WGPU_MAINVIEW_DUMP =3D removed from the environment
+The engine is launched once per sample, on that sample's rewritten world, i=
+n
+realtime engine mode.
+Outputs per sample, all PNG:
+rgb_000060.png 1896 x 1113, 8-bit, full stack (scattered sky, PCSS, SSR,
+GTAO, clouds), AgX tonemap
+depth_000060.png uint16 millimetres, planar, 0 =3D no hit
+inst_000060.png per-Solid instance ids, id =3D R + G*256 + B*65536,
+0 =3D background
+meta_000060.json intrinsics, extrinsics, light rig, encodings, and the
+instance id -> node name / DEF / world position map
+ONE ALIGNED SAMPLE PER ENGINE RUN, OFFLINE ONLY. The main view never
+repaints
+in batch or minimised mode, so a desktop GPU session is required and there
+is
+no batched or in-the-loop rendering. This cannot become a closed-loop
+tracking simulation as it stands.
+
+9. THE SCRIPTS
+------------------------------------------------------------------------
+scripts/dev/synth_data.py 258 lines - ships in the clone, not pasted here.
+The exporter: seeds the RNG, rewrites Viewpoint and OmniSimSun per sample,
+launches one engine per sample, waits for the four output files, retries
+once on an incomplete dump, and writes its own dataset manifest.
+06_diagnose_gates.py 121 lines - included in this delivery.
+Takes the largest blob YOUR make_mask() produces and walks your
+contour_quality() checks IN YOUR ORDER, reporting the FIRST gate that
+rejects each frame, with the measured value beside your own threshold.
+Writes gate_diagnosis.csv.
+07_score_red_tracker.py 198 lines - included in this delivery.
+Crops and resizes each render to 640x480, reads the instance map for exact
+target pixels, bbox and centroid, imports YOUR red_tracking module through
+a sys.path insert, calls RedBoardTracker(RedTrackingConfig()).process(frame=
+)
+statelessly per frame and again through one persistent tracker in azimuth
+order, computes centroid error, bbox IoU, area ratio and the depth
+cross-check, and writes ground_truth.csv, detector_vs_truth.csv and
+annotations.json.
+Neither script modifies your code. Both sys.path-insert your raspberry_pi/
+directory and import red_tracking directly.
+
+AREA-TO-RANGE: there is no separate script, and none was written. The
+area-to-distance calibration is three columns of 02_detector_vs_truth.csv -
+range_m (exact, from the camera extrinsics), gt_px (exact, from the instanc=
+e
+map) and det_area (your blob) - written by 07_score_red_tracker.py.
+The governing relation for a planar target is
+
+area_px ~=3D f^2 * A_board * cos(theta) / r^2
+
+with f about 987 px at 640x480 after this crop. These numbers are for a
+0.70 x 0.40 m board; scale by the area ratio for your real one.
+
+10. RE-RUNNING THE WHOLE THING FROM A FREE CLONE
+------------------------------------------------------------------------
+Stated as steps and parameters rather than a command line, so nothing here
+depends on a particular shell:
+
+1. Clone
+https://github.com/omnilink-tech/omnisim
+and build it following the repo's
+own instructions - AGENTS.md at the root, or docs/developer/quickstart.md.
+Windows and Linux each have a one-step bootstrap there.
+2. Stage the bundled physics runtime (a one-time step of roughly 600 MB,
+documented in the same place). This scene does not use physics, but the
+install check expects the runtime to be present.
+3. Run the install check - the omnisim CLI's "doctor" verb - and confirm it
+reports READY before going further.
+4. Save file 04 from this message as red_target_track.omniworld.
+5. Run the exporter, scripts/dev/synth_data.py, with these parameters:
+world the red_target_track.omniworld you just saved
+out any empty output directory
+samples 16
+seed 21
+target 0,0,0.55
+radius 1.8,6.0
+cam-elev 3,18
+Sun elevation and cloud cover are left at the exporter's own defaults
+(12,65 and 0.10,0.60) - see part 1 section 3.
+Budget about 11.5 s per sample, and note step 8 below.
+6. Run 07_score_red_tracker.py with three arguments, in this order: your
+repository checkout (the one holding raspberry_pi/red_tracking.py), the
+exporter's output directory, and an evaluation output directory. It writes
+ground_truth.csv, detector_vs_truth.csv and annotations.json.
+7. Run 06_diagnose_gates.py with the same three arguments, in the same
+order.
+It writes gate_diagnosis.csv.
+8. Step 5 needs a desktop GPU session. The main view does not repaint in a
+headless or minimised run, so this will not work over a bare SSH session
+or in CI without a real display.
+
+Steps 5 to 7 reproduce the camera poses, sun vectors, cloud covers and ever=
+y
+label exactly - the driver is deterministic in (world, seed, samples). The
+IMAGES are only as deterministic as the renderer, which moves between
+releases, so treat the CSVs rather than the pixels as the thing to diff
+against files 01-03.
+
+Exporter contract and limits: docs/developer/synthetic-data.md in the clone=
+.
