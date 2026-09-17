@@ -208,6 +208,33 @@ Where:
 
 ---
 
+## Synthetic Evaluation
+
+The red-target perception pipeline was independently evaluated using
+[OmniSim](https://github.com/omnilink-tech/omnisim) with synthetic RGB, depth,
+and per-instance segmentation ground truth.
+
+The original `RedBoardTracker` was tested without modification.
+
+| Metric | Result |
+|---|---:|
+| Detection | 8 / 16 |
+| Median centroid error | 1.93 px |
+| Mean centroid error | 3.54 px |
+| Mean bounding-box IoU | 0.9257 |
+| False positives | 0 |
+
+The evaluation identified `min_aspect_ratio` as the primary rejection gate
+under off-axis target views.
+
+Full evaluation data, scene configuration, and reproducibility information are
+available in [`simulation/omnisim/`](simulation/omnisim/).
+
+Simulation environment and evaluation tooling provided by the **OmniLink Team**
+using **OmniSim**.
+
+---
+
 ## Current Project Status
 
 ### Completed
