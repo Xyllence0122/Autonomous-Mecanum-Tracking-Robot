@@ -1,0 +1,189 @@
+(the complete scene -- save as red_target_track.omniworld)
+
+#OMNISIM R2025a utf8
+
+# Licence: Apache License 2.0. Copyright 2026 OmniLink.
+# Redistribution permitted with attribution; this notice must be retained.
+# Nothing here implies that OmniLink endorses any project this scene is
+used with.
+
+# OmniSim synthetic-data scene: RED TARGET BOARD for a classical OpenCV
+colour tracker.
+#
+# Built to be scored against, not trained on. One red board (DEF
+RED_TARGET) plus
+# deliberately non-red distractors, so an HSV threshold has something to
+reject.
+#
+# The board sits 0.35 m OFF the camera orbit centre on purpose: the
+exporter always
+# aims the camera at the orbit centre, so an on-centre target would land at
+the image
+# centre in every frame and the horizontal error a turn controller consumes
+would be
+# ~0 everywhere. Offsetting it makes the image-space error sweep across the
+useful
+# range instead.
+#
+# Board: 0.70 m wide x 0.06 m thick x 0.40 m tall. A real BOARD, not a cube
+-- so at
+# grazing azimuth it foreshortens to a sliver, which is a genuine property
+of the
+# target and not a trick.
+#
+# HONESTY NOTE, carried in the file on purpose: this is a PBR render, not a
+photograph.
+# The ground-truth centroid/bbox below are exact to the rendered geometry;
+the pixels
+# are not a transfer-quality stand-in for a USB camera looking at a real
+red board.
+#
+# RECIPE DEVIATION, deliberate: no SUN_MARKER / sun_marker supervisor. The
+marker
+# supervisor rewrites DEF SUN's direction every step, which would make the
+light rig
+# recorded in meta.json disagree with the light that rendered the frame.
+# Static scene: no boundingObject, no Physics -- kinematic-only props.
+
+EXTERNPROTO "omnisim://projects/objects/backgrounds/protos/OmniSimSky.proto=
+"
+EXTERNPROTO "omnisim://projects/objects/lights/protos/OmniSimSun.proto"
+EXTERNPROTO "omnisim://projects/appearances/protos/Grass.proto"
+EXTERNPROTO "omnisim://projects/appearances/protos/Pavement.proto"
+
+WorldInfo {
+basicTimeStep 16
+FPS 30
+title "Red target board (synthetic tracking ground truth)"
+info [
+"A red board on a post, offset from the camera orbit centre, with non-red
+distractors."
+"The instance pass gives the exact per-frame centroid and bounding box of
+the board."
+]
+}
+Viewpoint {
+orientation 0 0.18 0.98 0.72
+position -3.0 -1.2 0.9
+exposure 1.0
+}
+OmniSimSky { }
+DEF SUN OmniSimSun {
+direction -0.45 0.55 -0.70
+}
+
+DEF GROUND Solid {
+translation 0 0 -0.05
+children [
+Shape {
+appearance Grass { textureTransform TextureTransform { scale 12 12 } }
+geometry Box { size 40 40 0.10 }
+}
+]
+name "ground"
+}
+
+DEF PAD Solid {
+translation 0 0 0.002
+children [
+Shape {
+appearance Pavement { textureTransform TextureTransform { scale 4 4 } }
+geometry Box { size 6 6 0.01 }
+}
+]
+name "pad"
+}
+
+# ---- the tracked target
+-------------------------------------------------------
+DEF RED_TARGET Solid {
+translation 0.35 0 0.55
+children [
+Shape {
+appearance PBRAppearance {
+baseColor 0.85 0.04 0.04
+roughness 0.65
+metalness 0
+}
+geometry Box { size 0.70 0.06 0.40 }
+}
+]
+name "red_target"
+}
+
+DEF TARGET_POST Solid {
+translation 0.35 0 0.175
+children [
+Shape {
+appearance PBRAppearance {
+baseColor 0.18 0.18 0.19
+roughness 0.8
+metalness 0.1
+}
+geometry Box { size 0.06 0.06 0.35 }
+}
+]
+name "target_post"
+}
+
+# ---- non-red distractors: an HSV threshold must reject these
+-------------------
+DEF DISTRACTOR_BLUE_CRATE Solid {
+translation -1.35 0.85 0.22
+children [
+Shape {
+appearance PBRAppearance {
+baseColor 0.10 0.22 0.62
+roughness 0.7
+metalness 0
+}
+geometry Box { size 0.44 0.44 0.44 }
+}
+]
+name "distractor_blue_crate"
+}
+
+DEF DISTRACTOR_GREY_DRUM Solid {
+translation -1.10 -1.30 0.30
+children [
+Shape {
+appearance PBRAppearance {
+baseColor 0.55 0.55 0.53
+roughness 0.55
+metalness 0.25
+}
+geometry Cylinder { radius 0.26 height 0.60 }
+}
+]
+name "distractor_grey_drum"
+}
+
+DEF DISTRACTOR_GREEN_PANEL Solid {
+translation 1.50 -1.10 0.35
+children [
+Shape {
+appearance PBRAppearance {
+baseColor 0.12 0.45 0.16
+roughness 0.7
+metalness 0
+}
+geometry Box { size 0.50 0.05 0.70 }
+}
+]
+name "distractor_green_panel"
+}
+
+DEF DISTRACTOR_ORANGE_CONE Solid {
+translation 1.25 1.35 0.18
+children [
+Shape {
+appearance PBRAppearance {
+baseColor 0.85 0.36 0.06
+roughness 0.75
+metalness 0
+}
+geometry Box { size 0.26 0.26 0.36 }
+}
+]
+name "distractor_orange_cone"
+}
