@@ -37,8 +37,7 @@ blue crate baseColor 0.10 0.22 0.62 roughness 0.70
 grey drum baseColor 0.55 0.55 0.53 roughness 0.55 metalness 0.25
 green panel baseColor 0.12 0.45 0.16 roughness 0.70
 orange block baseColor 0.85 0.36 0.06 roughness 0.75
-The scene also holds DEF GROUND (id 1, Box 40 x 40 x 0.10 at z -0.05, Grass=
-,
+The scene also holds DEF GROUND (id 1, Box 40 x 40 x 0.10 at z -0.05, Grass,
 texture scale 12 x 12) and DEF PAD (id 2, Box 6 x 6 x 0.01 at z 0.002,
 Pavement, scale 4 x 4).
 The orange block is the hard one, and your HSV gate rejected it in all 16
@@ -48,20 +47,19 @@ frames: the candidate count never exceeded 1, so zero false positives.
 ------------------------------------------------------------------------
 The exporter dumps the renderer's MAIN VIEW, configured through environment
 variables set on each per-sample engine process:
-OMNISIM_WGPU_SYNTH_DUMP =3D that sample's output directory
-OMNISIM_WGPU_MAINVIEW_DUMP_FRAME =3D 60
-OMNISIM_WGPU_CLOUD_COVER =3D the sampled cover, 3 decimal places
-OMNISIM_LOG_PATH =3D that sample's engine log path
-OMNISIM_WGPU_MAINVIEW_DUMP =3D removed from the environment
-The engine is launched once per sample, on that sample's rewritten world, i=
-n
+OMNISIM_WGPU_SYNTH_DUMP = that sample's output directory
+OMNISIM_WGPU_MAINVIEW_DUMP_FRAME = 60
+OMNISIM_WGPU_CLOUD_COVER = the sampled cover, 3 decimal places
+OMNISIM_LOG_PATH = that sample's engine log path
+OMNISIM_WGPU_MAINVIEW_DUMP = removed from the environment
+The engine is launched once per sample, on that sample's rewritten world, in
 realtime engine mode.
 Outputs per sample, all PNG:
 rgb_000060.png 1896 x 1113, 8-bit, full stack (scattered sky, PCSS, SSR,
 GTAO, clouds), AgX tonemap
-depth_000060.png uint16 millimetres, planar, 0 =3D no hit
-inst_000060.png per-Solid instance ids, id =3D R + G*256 + B*65536,
-0 =3D background
+depth_000060.png uint16 millimetres, planar, 0 = no hit
+inst_000060.png per-Solid instance ids, id = R + G*256 + B*65536,
+0 = background
 meta_000060.json intrinsics, extrinsics, light rig, encodings, and the
 instance id -> node name / DEF / world position map
 ONE ALIGNED SAMPLE PER ENGINE RUN, OFFLINE ONLY. The main view never
@@ -85,8 +83,7 @@ Writes gate_diagnosis.csv.
 07_score_red_tracker.py 198 lines - included in this delivery.
 Crops and resizes each render to 640x480, reads the instance map for exact
 target pixels, bbox and centroid, imports YOUR red_tracking module through
-a sys.path insert, calls RedBoardTracker(RedTrackingConfig()).process(frame=
-)
+a sys.path insert, calls RedBoardTracker(RedTrackingConfig()).process(frame)
 statelessly per frame and again through one persistent tracker in azimuth
 order, computes centroid error, bbox IoU, area ratio and the depth
 cross-check, and writes ground_truth.csv, detector_vs_truth.csv and
@@ -96,12 +93,11 @@ directory and import red_tracking directly.
 
 AREA-TO-RANGE: there is no separate script, and none was written. The
 area-to-distance calibration is three columns of 02_detector_vs_truth.csv -
-range_m (exact, from the camera extrinsics), gt_px (exact, from the instanc=
-e
+range_m (exact, from the camera extrinsics), gt_px (exact, from the instance
 map) and det_area (your blob) - written by 07_score_red_tracker.py.
 The governing relation for a planar target is
 
-area_px ~=3D f^2 * A_board * cos(theta) / r^2
+area_px ~= f^2 * A_board * cos(theta) / r^2
 
 with f about 987 px at 640x480 after this crop. These numbers are for a
 0.70 x 0.40 m board; scale by the area ratio for your real one.
@@ -144,12 +140,10 @@ It writes gate_diagnosis.csv.
 headless or minimised run, so this will not work over a bare SSH session
 or in CI without a real display.
 
-Steps 5 to 7 reproduce the camera poses, sun vectors, cloud covers and ever=
-y
+Steps 5 to 7 reproduce the camera poses, sun vectors, cloud covers and every
 label exactly - the driver is deterministic in (world, seed, samples). The
 IMAGES are only as deterministic as the renderer, which moves between
 releases, so treat the CSVs rather than the pixels as the thing to diff
 against files 01-03.
 
-Exporter contract and limits: docs/developer/synthetic-data.md in the clone=
-.
+Exporter contract and limits: docs/developer/synthetic-data.md in the clone.

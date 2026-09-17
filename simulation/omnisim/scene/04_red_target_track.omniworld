@@ -45,8 +45,7 @@ light rig
 # recorded in meta.json disagree with the light that rendered the frame.
 # Static scene: no boundingObject, no Physics -- kinematic-only props.
 
-EXTERNPROTO "omnisim://projects/objects/backgrounds/protos/OmniSimSky.proto=
-"
+EXTERNPROTO "omnisim://projects/objects/backgrounds/protos/OmniSimSky.proto"
 EXTERNPROTO "omnisim://projects/objects/lights/protos/OmniSimSun.proto"
 EXTERNPROTO "omnisim://projects/appearances/protos/Grass.proto"
 EXTERNPROTO "omnisim://projects/appearances/protos/Pavement.proto"

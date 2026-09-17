@@ -14,8 +14,7 @@ boundingObject and no Physics node, so the physics runtime finalises
 nothing and there is no physics sidecar. That is the correct outcome for a
 render-only scene, and it is named here rather than quietly omitted.
 basicTimeStep 16, FPS 30, frame 60 dumped after settle.
-Your repository was taken from main as pushed 2026-09-06 and run unmodified=
-.
+Your repository was taken from main as pushed 2026-09-06 and run unmodified.
 Machine: AMD64, 16 cores, NVIDIA GeForce RTX 3060 Laptop GPU (driver
 596.36),
 Windows 11. Every number in this set was produced on that one machine.
@@ -35,24 +34,23 @@ runtime is bundled in the clone but is not exercised by this scene.
 
 2. RANDOM SEED AND THE EXACT SAMPLING RULE
 ------------------------------------------------------------------------
-seed =3D 21 samples =3D 16 frame =3D 60
+seed = 21 samples = 16 frame = 60
 Per sample i the exporter builds its own generator:
-rng =3D random.Random((seed << 20) + i)
+rng = random.Random((seed << 20) + i)
 and then draws, in this order:
-az =3D rng.uniform(0, 2*pi) camera azimuth
-el =3D radians(rng.uniform(cam_elev_lo, cam_elev_hi))
-rad =3D rng.uniform(radius_lo, radius_hi)
-saz =3D rng.uniform(0, 2*pi) sun azimuth
-sel =3D radians(rng.uniform(sun_elev_lo, sun_elev_hi))
-cover =3D rng.uniform(cloud_lo, cloud_hi)
+az = rng.uniform(0, 2*pi) camera azimuth
+el = radians(rng.uniform(cam_elev_lo, cam_elev_hi))
+rad = rng.uniform(radius_lo, radius_hi)
+saz = rng.uniform(0, 2*pi) sun azimuth
+sel = radians(rng.uniform(sun_elev_lo, sun_elev_hi))
+cover = rng.uniform(cloud_lo, cloud_hi)
 camera position:
-cam =3D (tx + rad*cos(el)*cos(az),
+cam = (tx + rad*cos(el)*cos(az),
 ty + rad*cos(el)*sin(az),
 tz + rad*sin(el))
-sun direction is the direction the LIGHT TRAVELS (down =3D negative z):
-sun =3D (-cos(sel)*cos(saz), -cos(sel)*sin(saz), -sin(sel))
-Each sample gets its own world file with Viewpoint and OmniSimSun rewritten=
-,
+sun direction is the direction the LIGHT TRAVELS (down = negative z):
+sun = (-cos(sel)*cos(saz), -cos(sel)*sin(saz), -sin(sel))
+Each sample gets its own world file with Viewpoint and OmniSimSun rewritten,
 so the camera poses, sun vectors and cloud covers are reproducible exactly
 from (world, seed, samples). The IMAGES are only as deterministic as the
 renderer.
@@ -74,7 +72,7 @@ the materials and the ground are fixed across all 16 samples.
 4. CAMERA CONFIGURATION
 ------------------------------------------------------------------------
 render resolution 1896 x 1113
-fx =3D fy 2288.6749860 px
+fx = fy 2288.6749860 px
 cx, cy 948, 556.5
 fov_x 0.785398 rad (45.0 deg)
 near / far 0.05 / 1000 m
@@ -82,14 +80,14 @@ axes camera +X forward, +Z up (world ENU)
 extrinsics per sample: world position plus a row-major 3x3
 rotation, in each sample's meta JSON file
 annotation resolution 640 x 480 - your vision_control.py sets
-FRAME_WIDTH=3D640, FRAME_HEIGHT=3D480
+FRAME_WIDTH=640, FRAME_HEIGHT=480
 resample recipe central crop of the 1896x1113 render to 4:3
-(1484 x 1113, x0 =3D 206), then resize to 640x480:
+(1484 x 1113, x0 = 206), then resize to 640x480:
 INTER_AREA for RGB, INTER_NEAREST for the instance map.
 Ground truth therefore lives in YOUR pixel coordinates,
 not in a rescaled approximation of them.
 effective focal after crop and resize: f is about 987 px at 640x480.
-depth settings uint16 PNG, millimetres, 0 =3D no hit, ceiling 65.535 m,
+depth settings uint16 PNG, millimetres, 0 = no hit, ceiling 65.535 m,
 CAMERA-PLANE (planar), not radial. Cross-checked
 against the extrinsics on all 16 frames:
 planar-minus-Euclidean delta -0.155 to -0.045 m,
@@ -117,8 +115,7 @@ sample cam x,y,z (m) az deg el deg r m sun dir x,y,z cloud
 013 -3.417, -3.747, 1.682 227.6 12.59 5.20 0.570,-0.395,-0.720 0.331
 014 4.103, -1.403, 1.558 341.1 13.09 4.45 0.098, 0.812,-0.575 0.216
 015 3.476, -3.007, 1.529 319.1 12.02 4.70 -0.947, 0.179,-0.266 0.151
-Every sample reports ok=3Dtrue. The camera target is (0, 0, 0.55) for all 1=
-6.
+Every sample reports ok=true. The camera target is (0, 0, 0.55) for all 16.
 
 Sections 6-10 - board geometry, distractors, export configuration, the
 scripts
