@@ -3,8 +3,7 @@ configuration, the scripts, the re-run recipe)
 
 OmniSim synthetic-data export - reproducibility configuration, part 2 of 2
 for
-https://www.google.com/url?q=3Dhttp://github.com/Xyllence0122/Autonomous-Me=
-canum-Tracking-Robot&source=3Dgmail&ust=3D1789319036038000&sa=3DE
+https://github.com/Xyllence0122/Autonomous-Mecanum-Tracking-Robot
 Same export as part 1: wgpu-native renderer, AgX tonemap, no physics, seed
 21.
 Licence: Apache License 2.0. Redistribution permitted with attribution.
@@ -113,8 +112,7 @@ Stated as steps and parameters rather than a command line, so nothing here
 depends on a particular shell:
 
 1. Clone
-https://www.google.com/url?q=3Dhttp://github.com/omnilink-tech/omnisim&sour=
-ce=3Dgmail&ust=3D1789319036038000&sa=3DE
+https://github.com/omnilink-tech/omnisim
 and build it following the repo's
 own instructions - AGENTS.md at the root, or docs/developer/quickstart.md.
 Windows and Linux each have a one-step bootstrap there.
